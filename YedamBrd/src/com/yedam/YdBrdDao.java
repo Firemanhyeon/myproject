@@ -7,6 +7,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.yedam.Ydbrd;
+
 public class YdBrdDao {
 	Connection conn;
 	PreparedStatement psmt;
@@ -15,6 +17,10 @@ public class YdBrdDao {
 	String sql;
 	String remid;
 	int srcnum;
+	int clickcheck;
+	ArrayList<Integer> checkcount = new ArrayList();
+	ArrayList<Integer> checklike = new ArrayList();
+	String count;
 
 	// close메소드
 	public void close() {
@@ -56,7 +62,7 @@ public class YdBrdDao {
 	}
 
 	public boolean newid(Ydbrd newid) {
-		sql = "insert into id_pw values(?,?)";
+		sql = "insert into id_pw(user_id , user_pw) values(?,?)";
 		conn = Dao.getConnect();
 
 		try {
@@ -79,7 +85,7 @@ public class YdBrdDao {
 	// 댓글목록
 	public List<Ydbrd> comment() {
 		List<Ydbrd> list = new ArrayList<>();
-		sql = "select user_commentno , user_comment , user_id , create_date from hh_comment where brd_no = ? order by create_date";
+		sql = "select user_commentno , user_comment , user_id , create_date from hh_comment where brd_no = ? order by create_date DESC";
 		conn = Dao.getConnect();
 
 		try {
@@ -106,7 +112,7 @@ public class YdBrdDao {
 	// 글목록
 	public List<Ydbrd> list() {
 		List<Ydbrd> list = new ArrayList<>();
-		sql = "select brd_no, brd_title,create_date from hh_brd order by create_date";
+		sql = "select brd_no, brd_title,create_date from hh_brd order by create_date DESC";
 		conn = Dao.getConnect();
 
 		try {
@@ -217,7 +223,27 @@ public class YdBrdDao {
 		}
 		return false;
 	}
-
+	//댓글 삭제 메소드
+	public boolean comdelete (int comdel) {
+		sql = "delete from hh_comment where user_commentno = ? and user_id = ? ";
+		conn = Dao.getConnect();
+		try {
+			psmt = conn.prepareStatement(sql);
+			psmt.setInt(1, comdel);
+			psmt.setString(2, remid);
+			
+			int r = psmt.executeUpdate();
+			if(r>0) {
+				return true;
+				
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}finally {
+			close();
+		}
+		return false;
+	}
 	// 관리자권한 수정 메소드
 	public boolean managermodify(Ydbrd modify) {
 		sql = "update hh_brd set brd_content =? " + "where brd_no = ?  ";
@@ -265,16 +291,23 @@ public class YdBrdDao {
 
 	// 상세보기메소드
 	public Ydbrd deepsrc(int num) {
+
 		sql = "select * from hh_brd where brd_no = ?";
-		String count = "update hh_brd set click_cnt = click_cnt+1 where brd_no = ?";
+		if (checkcount.contains(num)) {
+		} else {
+			count = "update hh_brd set click_cnt = click_cnt+1 where brd_no = ?";
+		}
+
 		conn = Dao.getConnect();
 		try {
+			if (checkcount.contains(num)) {
+			} else {
+				psmt2 = conn.prepareStatement(count);
+				psmt2.setInt(1, num);
+				int rs2 = psmt2.executeUpdate();
+			}
 			psmt = conn.prepareStatement(sql);
-			psmt2 = conn.prepareStatement(count);
-
 			psmt.setInt(1, num);
-			psmt2.setInt(1, num);
-			int rs2 = psmt2.executeUpdate();
 			rs = psmt.executeQuery();
 
 			while (rs.next()) {
@@ -284,9 +317,12 @@ public class YdBrdDao {
 				brd.setContent(rs.getString("brd_content"));
 				brd.setDate(rs.getDate("create_date"));
 				brd.setId(rs.getString("user_id"));
+
 				brd.setCount(rs.getInt("click_cnt"));
+
 				brd.setLike(rs.getInt("brd_like"));
 				srcnum = num;
+				checkcount.add(num);
 				return brd;
 
 			}
@@ -298,22 +334,94 @@ public class YdBrdDao {
 		return null;
 	}
 
+	// 좋아요 메소드
 	public boolean like() {
-		sql = "update hh_brd set brd_like = brd_like+1 where brd_no = ? ";
+		if (checklike.contains(srcnum)) {
+			System.out.println("좋아요 해제 되었습니다");
+			sql = "update hh_brd set brd_like = brd_like-1 where brd_no = ? ";
+			conn = Dao.getConnect();
+			try {
+				psmt = conn.prepareStatement(sql);
+				psmt.setInt(1, srcnum);
+
+				int r = psmt.executeUpdate();
+				if (r > 0) {
+					return true;
+				}
+			} catch (SQLException e) {
+				e.printStackTrace();
+			} finally {
+				checklike.remove(Integer.valueOf(srcnum));
+				close();
+			}
+			return false;
+
+		} else {
+
+			sql = "update hh_brd set brd_like = brd_like+1 where brd_no = ? ";
+			conn = Dao.getConnect();
+			try {
+				psmt = conn.prepareStatement(sql);
+				psmt.setInt(1, srcnum);
+
+				int r = psmt.executeUpdate();
+				if (r > 0) {
+					return true;
+				}
+			} catch (SQLException e) {
+				e.printStackTrace();
+			} finally {
+				checklike.add(srcnum);
+				close();
+			}
+			return false;
+		}
+	}
+	public List<Ydbrd> sclist(Ydbrd title) {
+		List<Ydbrd> sclist = new ArrayList();
+		sql = "SELECT brd_no, brd_title, create_date FROM hh_brd WHERE brd_title LIKE ? order by create_date DESC";
 		conn = Dao.getConnect();
 		try {
 			psmt = conn.prepareStatement(sql);
-			psmt.setInt(1, srcnum);
-
-			int r = psmt.executeUpdate();
-			if (r > 0) {
-				return true;
+			psmt.setString(1, title.getTitle());
+			rs=psmt.executeQuery();
+			while(rs.next()) {
+				Ydbrd sclist1 = new Ydbrd();
+				sclist1.setBrdnum(rs.getInt("brd_no"));
+				sclist1.setTitle(rs.getString("brd_title"));
+				sclist1.setDate(rs.getDate("create_date"));
+				sclist.add(sclist1);
+				
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
-		} finally {
+		}finally {
 			close();
 		}
-		return false;
+		return sclist;
+	}
+	public List<Ydbrd>mylist(){
+		List<Ydbrd> mylist = new ArrayList();
+		sql = "select brd_no , brd_title , create_date from hh_brd where user_id = ? ";
+		conn = Dao.getConnect();
+		
+		try {
+			psmt = conn.prepareStatement(sql);
+			psmt.setString(1, remid);
+			
+			rs=psmt.executeQuery();
+			while(rs.next()) {
+				Ydbrd mylist1 = new Ydbrd();
+				mylist1.setBrdnum(rs.getInt("brd_no"));
+				mylist1.setTitle(rs.getString("brd_title"));
+				mylist1.setDate(rs.getDate("create_date"));
+				mylist.add(mylist1);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}finally {
+			close();
+		}
+		return mylist;
 	}
 }

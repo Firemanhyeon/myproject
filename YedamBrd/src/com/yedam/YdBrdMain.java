@@ -1,5 +1,6 @@
 package com.yedam;
 
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Scanner;
 
@@ -12,47 +13,44 @@ public class YdBrdMain {
 		int menu = 0;
 		int start = 0;
 		int end = 5;
-		
+		int choice;
 		String id1 = "";
 		while (true) {
 			System.out.println("1.로그인  2.회원가입");
 			int sel = Integer.parseInt(sc.nextLine());
-			if(sel ==1) {
+			if (sel == 1) {
 				System.out.println("아이디를 입력하세요");
 				String id = sc.nextLine();
 				id1 = id;
 				System.out.println("비밀번호를 입력하세요");
 				String pw = sc.nextLine();
 				if (dao.login(id, pw)) {
-					if(id.equals("admin")) {
+					if (id.equals("admin")) {
 						System.out.println("관리자 로그인 성공");
 						break;
 					}
 					System.out.println("로그인성공!");
-					
+
 					break;
 				} else {
 					System.out.println("로그인실패.");
 					continue;
 				}
-			}
-			else if(sel ==2) {
+			} else if (sel == 2) {
 				System.out.println("아이디를 입력하세요");
 				String newid = sc.nextLine();
 				System.out.println("비밀번호를 입력하세요");
 				String newpw = sc.nextLine();
 				dao1.setId(newid);
 				dao1.setPw(newpw);
-				if(dao.newid(dao1)) {
+				if (dao.newid(dao1)) {
 					System.out.println("회원가입완료");
 					continue;
-				}
-				else {
+				} else {
 					System.out.println("회원가입 실패");
 					continue;
 				}
-			}
-			else {
+			} else {
 				System.out.println("잘못 입력했습니다");
 				continue;
 			}
@@ -62,10 +60,10 @@ public class YdBrdMain {
 		while (true) {
 			List<Ydbrd> list = dao.list();
 
-			if (list.size() ==0) {
+			if (list.size() == 0) {
 				System.out.println("작성된 글이 없습니다");
 			} else {
-				System.out.println("================================");
+				System.out.println("===================글 목록==================");
 
 				for (int i = start; i < end; i++) {
 					if (i < list.size()) {
@@ -76,8 +74,8 @@ public class YdBrdMain {
 
 			}
 
-			System.out.println("================================");
-			System.out.println("1.글쓰기 2.글 선택 3.이전페이지 4.다음페이지");
+			System.out.println("==========================================");
+			System.out.println("1.글쓰기 2.글 선택 3.이전페이지 4.다음페이지 5.검색 6.내가 쓴 글 목록");
 			System.out.println("선택> ");
 			menu = Integer.parseInt(sc.nextLine());
 
@@ -102,14 +100,14 @@ public class YdBrdMain {
 				boolean in = true;
 				while (in) {
 					Ydbrd brd1 = dao.deepsrc(num);
-					if(brd1==null) {
+					if (brd1 == null) {
 						System.out.println("해당글이 없습니다");
 						break;
 					}
 					System.out.println("===================" + num + "번 글 입니다==================");
 					System.out.println("글번호: " + brd1.getBrdnum() + "           제목: " + brd1.getTitle() + " \n내용: "
 							+ brd1.getContent() + " \n날짜: " + brd1.getDate() + "   작성자: " + brd1.getId() + "   조회수: "
-							+ brd1.getCount()+ "  좋아요: "+ brd1.getLike());
+							+ brd1.getCount() + "  좋아요: " + brd1.getLike());
 					System.out.println("====================댓글==========================");
 					List<Ydbrd> list2 = dao.comment();
 					if (list2.size() == 0) {
@@ -120,10 +118,16 @@ public class YdBrdMain {
 									+ brd2.getId() + " 날짜: " + brd2.getDate());
 						}
 					}
-					System.out.println("1.댓글작성 2.수정 3.삭제 4. 돌아가기 5.좋아요 ");
-					int choice = Integer.parseInt(sc.nextLine());
-					
-					//댓글작성
+					if (dao.checklike.contains(dao.srcnum)) {
+						System.out.println("1.댓글작성 2.수정 3.삭제 4. 돌아가기 5.좋아요해제 ");
+						choice = Integer.parseInt(sc.nextLine());
+					} else {
+
+						System.out.println("1.댓글작성 2.수정 3.삭제 4. 돌아가기 5.좋아요 6.댓글삭제");
+						choice = Integer.parseInt(sc.nextLine());
+
+					}
+					// 댓글작성
 					if (choice == 1) {
 						System.out.println("댓글내용을입력하세요");
 						String comm = sc.nextLine();
@@ -134,14 +138,14 @@ public class YdBrdMain {
 							System.out.println("등록 실패");
 
 						}
-						
-					//수정
+
+						// 수정
 					} else if (choice == 2) {
 						System.out.println("수정할 내용을 입력해주세요");
 						String content = sc.nextLine();
 						Ydbrd modify = new Ydbrd();
 						modify.setContent(content);
-						if(id1.equals("admin")) {
+						if (id1.equals("admin")) {
 							dao.managermodify(modify);
 							System.out.println("관리자권한 수정 완료");
 							break;
@@ -152,29 +156,41 @@ public class YdBrdMain {
 							System.out.println("수정권한이 없습니다");
 						}
 					}
-					//삭제
+					// 삭제
 					else if (choice == 3) {
-						if(id1.equals("admin")) {
+						if (id1.equals("admin")) {
 							dao.managerdelete();
 							System.out.println("관리자권한 삭제완료");
 							break;
-						}else {
+						} else {
 							if (dao.delete()) {
 								System.out.println("삭제되었습니다");
 								break;
 							} else {
 								System.out.println("삭제권한이 없습니다");
 							}
-							
+
 						}
-					//돌아가기
+						// 돌아가기
 					} else if (choice == 4) {
 						break;
 					}
-					//좋아요
+					// 좋아요
 					else if (choice == 5) {
 						dao.like();
 						continue;
+					}
+					//댓글 삭제 
+					else if(choice ==6) {
+						System.out.println("삭제할 댓글번호를 입력하세요");
+						int comdel = Integer.parseInt(sc.nextLine());
+						Ydbrd comdel1 = new Ydbrd();
+						if(dao.comdelete(comdel)) {
+							System.out.println("삭제완료");
+						}else {
+							System.out.println("삭제실패");
+						}
+
 					}
 				}
 			} else if (menu == 3) {
@@ -196,8 +212,30 @@ public class YdBrdMain {
 					System.out.println("마지막페이지입니다");
 					continue;
 				}
-			}
+			} else if (menu == 5) {
+				System.out.println("검색하실 제목을 입력해주세요");
+				String sctitle = sc.nextLine();
+				dao1.setTitle(sctitle);
+				List<Ydbrd> sclist = dao.sclist(dao1);
 
+				System.out.println("================검색결과=====================");
+				for (Ydbrd sclist1 : sclist) {
+					System.out.println("글 번호: " + sclist1.getBrdnum() + "  제목: " + sclist1.getTitle() + "  작성날짜: "
+							+ sclist1.getDate());
+
+				}
+				System.out.println("\n");
+			} else if (menu == 6) {
+				List<Ydbrd> mylist =dao.mylist();
+				System.out.println("================내가쓴글=====================");
+				for (Ydbrd mylist1 : mylist) {
+					System.out.println("글 번호: " + mylist1.getBrdnum() + "  제목: " + mylist1.getTitle() + "  작성날짜: "
+							+ mylist1.getDate());
+
+				}
+				System.out.println("\n");
+			}
 		}
+
 	}
 }
