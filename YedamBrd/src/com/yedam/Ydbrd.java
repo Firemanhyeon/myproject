@@ -19,4 +19,5 @@ public class Ydbrd {
 	private String comment;
 	private int count;
 	private int like;
+	private String email;
 }

@@ -21,7 +21,8 @@ public class YdBrdDao {
 	ArrayList<Integer> checkcount = new ArrayList();
 	ArrayList<Integer> checklike = new ArrayList();
 	String count;
-
+	String renameid;
+	String rememail;
 	// close메소드
 	public void close() {
 		try {
@@ -60,15 +61,16 @@ public class YdBrdDao {
 		}
 		return false;
 	}
-
+	//회원가입메소드
 	public boolean newid(Ydbrd newid) {
-		sql = "insert into id_pw(user_id , user_pw) values(?,?)";
+		sql = "insert into id_pw(user_id , user_pw, email ) values(?,?,?)";
 		conn = Dao.getConnect();
 
 		try {
 			psmt = conn.prepareStatement(sql);
 			psmt.setString(1, newid.getId());
 			psmt.setString(2, newid.getPw());
+			psmt.setString(3, newid.getEmail());
 
 			int r = psmt.executeUpdate();
 			if (r > 0) {
@@ -201,7 +203,69 @@ public class YdBrdDao {
 		}
 		return false;
 	}
-
+	//아이디 비번 찾기 메소드 
+	public boolean srchid(String id , String email) {
+		sql = "select * from id_pw where user_id = ? and email = ?";
+		conn = Dao.getConnect();
+		try {
+			psmt = conn.prepareStatement(sql);
+			psmt.setString(1, id);
+			renameid = id;
+			psmt.setString(2, email);
+			rememail = email;
+			
+			int r = psmt.executeUpdate();
+			if(r>0) {
+				return true;
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}finally {
+			close();
+		}
+		return false;
+	}
+	//비번재설정 메소드 
+	public boolean pwrename(String strNum) {
+		sql = "update id_pw set user_pw = ? where user_id = ? and email = ? ";
+		conn = Dao.getConnect();
+		
+		try {
+			psmt = conn.prepareStatement(sql);
+			psmt.setString(1, strNum);
+			psmt.setString(2,renameid );
+			psmt.setString(3, rememail);
+			
+			int r = psmt.executeUpdate();
+			if(r>0) {
+				return true;
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}finally {
+			close();
+		}
+		return false;
+		
+	}
+	public boolean repw(String repw) {
+		sql = "update id_pw set user_pw = ? where user_id = ?";
+		conn = Dao.getConnect();
+		try {
+			psmt = conn.prepareStatement(sql);
+			psmt.setString(1, repw);
+			psmt.setString(2, remid);
+			int r = psmt.executeUpdate();
+			if(r>0) {
+				return true;
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}finally {
+			close();
+		}
+		return false;
+	}
 	// 글 삭제 메소드
 	public boolean delete() {
 		sql = "delete from hh_brd where brd_no = ? and user_id = ?";
