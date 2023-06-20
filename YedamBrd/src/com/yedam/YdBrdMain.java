@@ -16,7 +16,6 @@ public class YdBrdMain {
 		int end = 5;
 		int choice;
 		String id1 = "";
-
 		// 로그인창
 		while (true) {
 			System.out.println("1.로그인  2.회원가입  3. 아이디/비밀번호 찾기");
@@ -34,7 +33,6 @@ public class YdBrdMain {
 							break;
 						}
 						System.out.println("로그인성공!");
-
 						break;
 					} else {
 						System.out.println("로그인실패.");
@@ -60,9 +58,8 @@ public class YdBrdMain {
 				} else if (sel == 3) {
 					System.out.println("◆아이디 입력◆");
 					String id = sc.nextLine();
-					System.out.print("◆메일 입력◆");
+					System.out.println("◆메일 입력◆");
 					String to = sc.nextLine();
-
 					if (dao.srchid(id, to)) {
 						String title = "비밀번호 재설정";
 						Random r = new Random();
@@ -73,27 +70,23 @@ public class YdBrdMain {
 						StringBuilder sb = new StringBuilder();
 						sb.append("<p>비밀번호 초기화 안내 메일</p>");
 						sb.append("<p>");
-						sb.append("새로운 비밀번호는: " + content + " 입니다");
+						sb.append("새로운 비밀번호는: " + content + "입니다");
 						sb.append("</p>");
 						sb.append("<b>Good Bye!!</b>");
 						content = sb.toString();
-
 						SendMail mail = new SendMail();
 						mail.sendMail(to, title, content);
 					} else {
 						System.out.println("◆아이디,이메일이 일치하지않습니다◆");
 					}
-
 				} else {
 					System.out.println("◆잘못입력했습니다◆");
 				}
-
 			} catch (Exception e) {
 				System.out.println("◆숫자를입력하세요◆");
 			}
 		}
 		// 로그인창 끝
-
 		// 메인화면
 		while (true) {
 			List<Ydbrd> list = dao.list();
@@ -102,22 +95,18 @@ public class YdBrdMain {
 				System.out.println("◆작성된 글이 없습니다◆");
 			} else {
 				System.out.println("===================글 목록==================");
-
 				for (int i = start; i < end; i++) {
 					if (i < list.size()) {
 						System.out.println("글 번호: " + list.get(i).getBrdnum() + " | 제목: " + list.get(i).getTitle()
 								+ " | 작성날짜: " + list.get(i).getDate());
 					}
 				}
-
 			}
-
 			System.out.println("==========================================");
 			System.out.println("1.글쓰기 | 2.글 선택 | 3.이전페이지 | 4.다음페이지 | 5.검색 | 6.내가 쓴 글 목록 | 7.설정 ");
 			System.out.println("선택> ");
 			try {
 				menu = Integer.parseInt(sc.nextLine());
-
 				// 글쓰기
 				if (menu == 1) {
 					System.out.println("◆제목을 입력하세요> ");
@@ -130,10 +119,8 @@ public class YdBrdMain {
 						System.out.println("◆등록 완료◆");
 					} else {
 						System.out.println("◆등록 실패◆");
-
 					}
 				}
-
 				// 상세보기
 				else if (menu == 2) {
 					System.out.println("◆선택할 글 번호를 입력해주세요◆");
@@ -163,10 +150,8 @@ public class YdBrdMain {
 							System.out.println("1.댓글작성 | 2.수정 | 3.삭제 | 4.돌아가기 | 5.좋아요해제 | 6.댓글삭제");
 							choice = Integer.parseInt(sc.nextLine());
 						} else {
-
 							System.out.println("1.댓글작성 | 2.수정 | 3.삭제 | 4.돌아가기 | 5.좋아요 | 6.댓글삭제");
 							choice = Integer.parseInt(sc.nextLine());
-
 						}
 						// 댓글작성
 						if (choice == 1) {
@@ -177,9 +162,7 @@ public class YdBrdMain {
 								System.out.println("◆등록 완료◆");
 							} else {
 								System.out.println("◆등록 실패◆");
-
 							}
-
 							// 수정
 						} else if (choice == 2) {
 							System.out.println("◆수정할 내용을 입력해주세요◆");
@@ -210,7 +193,6 @@ public class YdBrdMain {
 								} else {
 									System.out.println("◆삭제권한이 없습니다◆");
 								}
-
 							}
 							// 돌아가기
 						} else if (choice == 4) {
@@ -225,7 +207,6 @@ public class YdBrdMain {
 						else if (choice == 6) {
 							System.out.println("◆삭제할 댓글번호를 입력하세요◆");
 							int comdel = Integer.parseInt(sc.nextLine());
-							Ydbrd comdel1 = new Ydbrd();
 							if (dao.comdelete(comdel)) {
 								System.out.println("◆삭제완료◆");
 							} else {
@@ -233,7 +214,6 @@ public class YdBrdMain {
 							}
 						}
 					}
-
 					// 이전페이지
 				} else if (menu == 3) {
 					if (start > 4 || end > 5) {
@@ -244,7 +224,6 @@ public class YdBrdMain {
 						System.out.println("◆첫페이지입니다◆");
 						continue;
 					}
-
 					// 다음페이지
 				} else if (menu == 4) {
 					if (list.size() >= end) {
@@ -255,19 +234,16 @@ public class YdBrdMain {
 						System.out.println("◆마지막페이지입니다◆");
 						continue;
 					}
-
 					// 검색
 				} else if (menu == 5) {
 					System.out.println("◆검색하실 제목을 입력해주세요◆");
 					String sctitle = sc.nextLine();
 					dao1.setTitle(sctitle);
 					List<Ydbrd> sclist = dao.sclist(dao1);
-
 					System.out.println("================검색결과=====================");
 					for (Ydbrd sclist1 : sclist) {
 						System.out.println("글 번호: " + sclist1.getBrdnum() + "  제목: " + sclist1.getTitle() + "  작성날짜: "
 								+ sclist1.getDate());
-
 					}
 					System.out.println("\n");
 
@@ -281,7 +257,6 @@ public class YdBrdMain {
 					}
 					System.out.println("\n");
 				}
-
 				// 설정
 				else if (menu == 7) {
 					System.out.println("1.비밀번호 변경");
@@ -301,8 +276,6 @@ public class YdBrdMain {
 			} catch (Exception e) {
 				System.out.println("◆번호를 입력하세요◆");
 			}
-
 		}
-
 	}
 }
