@@ -5,22 +5,23 @@ import { Cat } from './cats.schema';
 import { Model } from 'mongoose';
 import * as bcrypt from 'bcrypt';
 import { catLoginDto } from './dto/cats.login.dto';
+import { CatsRepository } from './cats.repository';
 
 @Injectable()
 export class CatsService {
-    constructor(@InjectModel(Cat.name) private readonly catModel: Model<Cat>) {}
+    constructor(private readonly catsRepositry: CatsRepository) {}
 
     async signUp(body: CatRequestDto) {
         const { email, name, password } = body;
         //중복확인
-        const isCatExist = await this.catModel.exists({ email }); //catmodel안에 emial 필드를 검색해서 일치하는지 체크해준다 Promise<boolean> 형식으로 return
+        const isCatExist = await this.catsRepositry.existsByEmail(email); //catmodel안에 emial 필드를 검색해서 일치하는지 체크해준다 Promise<boolean> 형식으로 return
         if (isCatExist) {
             throw new UnauthorizedException('해당하는 고양이는 이미 존재합니다');//403에러 일으킴
         }
 
         //패스워드암호화 //bcrypt 라이브러리로 암호화
         const hashedPassword = await bcrypt.hash(password, 10);
-        const cat = await this.catModel.create({
+        const cat = await this.catsRepositry.create({
             email,
             name,
             password: hashedPassword
@@ -31,7 +32,7 @@ export class CatsService {
 
     async login(body: catLoginDto) {
         const { email, password } = body;
-        const cat = await this.catModel.findOne({ email });
+        const cat = await this.catsRepositry.findOne( email );
         if (cat) {
             const pwd = await bcrypt.compare(password, cat.password);
             if (pwd) {
