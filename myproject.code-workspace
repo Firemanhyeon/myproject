@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"name": "myproject",
+			"path": "."
+		},
+		{
+			"name": "node_modules",
+			"path": "../../../.Trash/node_modules"
+		}
+	],
+	"settings": {}
+}
