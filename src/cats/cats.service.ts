@@ -30,9 +30,10 @@ export class CatsService {
         return cat.readOnlyData;
     }
 
+    //로그인
     async login(body: catLoginDto) {
         const { email, password } = body;
-        const cat = await this.catsRepositry.findOne( email );
+        const cat = await this.catsRepositry.findCatByEmail( email );
         if (cat) {
             const pwd = await bcrypt.compare(password, cat.password);
             if (pwd) {

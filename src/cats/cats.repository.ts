@@ -22,8 +22,9 @@ export class CatsRepository {
         return await this.catModel.create(cat);
     }
     //이메일있는지없는지
-    async findOne(email: string): Promise<Cat>{
+    async findCatByEmail(email: string): Promise<Cat>{
         const find = await this.catModel.findOne({ email });
         return find ;
     }
+
 }

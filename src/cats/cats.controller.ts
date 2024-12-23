@@ -6,12 +6,16 @@ import { CatRequestDto } from './dto/cats.request.dto';
 import { catLoginDto } from './dto/cats.login.dto';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { readOnlyCatDto } from './dto/cat.dto';
+import { AuthService } from 'src/auth/auth.service';
 
 @Controller('cats')
 @UseInterceptors(SuccessInterceptor)
 @UseFilters(HttpExceptionFilter)
 export class CatsController {
-  constructor(private readonly catsService: CatsService) {}
+  constructor(
+    private readonly catsService: CatsService,
+    private readonly authService: AuthService
+  ) { }
 
   @ApiOperation({ summary: '현재고양이가져오기' })
   @Get()
@@ -34,16 +38,22 @@ export class CatsController {
     // console.log(body);
     return await this.catsService.signUp(body);
   }
+
+
   @ApiOperation({ summary: '로그인' })
   @Post('login')
   async login(@Body() body: catLoginDto) {
-    return await this.catsService.login(body);
+    return this.authService.jwtLogIn(body);
   }
+
+
   @ApiOperation({ summary: '로그아웃' })
   @Post('logout')
   logOut() {
     return 'logout';
   }
+
+
   @ApiOperation({ summary: '이미지업로드' })
   @Post('upload/cats')
   uploadCatImg() {
