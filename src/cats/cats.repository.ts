@@ -9,6 +9,11 @@ import { CatRequestDto } from "./dto/cats.request.dto";
 export class CatsRepository {
   constructor(@InjectModel(Cat.name) private readonly catModel: Model<Cat>) {}
 
+    async findCatByIdWithoutPassword(catId: string): Promise<Cat | null>{
+        const cat = await this.catModel.findById(catId).select('-password');
+        return cat;
+    }
+    
   async existsByEmail(email: string): Promise<boolean> {
     try {
         const result = await this.catModel.exists({ email });
@@ -25,6 +30,13 @@ export class CatsRepository {
     async findCatByEmail(email: string): Promise<Cat>{
         const find = await this.catModel.findOne({ email });
         return find ;
+    }
+    async findByIdAndUpdateImg(id: string, fileName: string) {
+        const cat = await this.catModel.findById(id);
+        cat.imgUrl = `http://localhost:8000/media/${fileName}`;
+        const newCat = await cat.save();
+        console.log('newCat', newCat);
+        return newCat.readOnlyData;
     }
 
 }

@@ -1,11 +1,11 @@
 import { HttpException, Injectable, UnauthorizedException } from '@nestjs/common';
-import { CatRequestDto } from './dto/cats.request.dto';
+import { CatRequestDto } from '../dto/cats.request.dto';
 import { InjectModel } from '@nestjs/mongoose';
-import { Cat } from './cats.schema';
+import { Cat } from '../cats.schema';
 import { Model } from 'mongoose';
 import * as bcrypt from 'bcrypt';
-import { catLoginDto } from './dto/cats.login.dto';
-import { CatsRepository } from './cats.repository';
+import { catLoginDto } from '../dto/cats.login.dto';
+import { CatsRepository } from '../cats.repository';
 
 @Injectable()
 export class CatsService {
@@ -46,5 +46,16 @@ export class CatsService {
         } else {
             throw new HttpException('아이디 또는 비밀번호가 일치하지 않습니다', 403);
         }
+    }
+
+    async uploadImg(cat: Cat, files: Express.Multer.File[]) {
+        const fileName = `cats/${files[0].filename}`;
+        console.log(fileName);
+        const newCat = await this.catsRepositry.findByIdAndUpdateImg(
+            cat.id,
+            fileName,
+        );
+        console.log(newCat);
+        return newCat;
     }
 }
