@@ -7,6 +7,7 @@ import { CatsRepository } from './cats.repository';
 import { AuthModule } from 'src/auth/auth.module';
 import { MulterModule } from '@nestjs/platform-express';
 
+//미디어파일관련 설정
 @Module({
   imports: [
     MulterModule.register({
